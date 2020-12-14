@@ -24,3 +24,5 @@ After that, this repo can be installed as a python package in editable mode:
 
 There is no need to reinstall the package after its source code has been changed;
 altered setuptools configuration such as changes to the list of dependencies will not be applied automatically however.
+
+Successful setup can be verified by the availability of `gymscraper` on path (in the virtual environment).
