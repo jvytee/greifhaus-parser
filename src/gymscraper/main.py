@@ -7,8 +7,8 @@ def main():
     if not config:
         exit(-1)
 
-    outputDir = config['outputDir']
-    targets = config['targets']
+    outputDir = config["outputDir"]
+    targets = config["targets"]
 
     for target in targets:
         parseTarget(target, outputDir)
