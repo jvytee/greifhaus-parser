@@ -38,16 +38,6 @@ defaultConfig = {
     'outputDir': os.path.dirname(__file__)
 }
 
-def main():
-    config = loadConfig()
-    if not config:
-        exit(-1)
-    outputDir = config['outputDir']
-    targets = config['targets']
-    for target in targets:
-        parseTarget(target, outputDir)
-    
-
 def parseTarget(target, outputDir):
     currentVisitors, currentFree = getClientCount(target)
     if currentVisitors is None or currentFree is None:
@@ -174,6 +164,3 @@ class Log:
     @staticmethod
     def log(tag, message):
         print('[{time}] [{tag}] {message}'.format(time = getLogTime(), tag = tag, message = message))
-
-if __name__ == "__main__":
-    main()
