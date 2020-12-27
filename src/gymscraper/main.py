@@ -1,4 +1,4 @@
-from .parser import loadConfig, parseTarget
+from .controller import loadConfig, parseTarget
 
 
 def main():
