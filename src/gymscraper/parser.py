@@ -1,3 +1,4 @@
+import logging
 import re
 import urllib.request
 from enum import Enum
@@ -11,9 +12,12 @@ class Gym(Enum):
 
 
 def getClientCount(target):
+    logging.debug("Getting client count for %s", target)
+
     url = target["url"]
     html = urllib.request.urlopen(url).read()
     soup = BeautifulSoup(html, features="lxml")
+
     if target["type"] == Gym.BOULDERADO:
         return parseBoulderado(soup)
     elif target["type"] == Gym.WEBCLIMBER:
