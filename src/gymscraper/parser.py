@@ -18,15 +18,17 @@ def getClientCount(target):
     html = urllib.request.urlopen(url).read()
     soup = BeautifulSoup(html, features="lxml")
 
-    if target["type"] == Gym.BOULDERADO:
+    if target["type"] == Gym.BOULDERADO.value:
         return parseBoulderado(soup)
-    elif target["type"] == Gym.WEBCLIMBER:
+    elif target["type"] == Gym.WEBCLIMBER.value:
         return parseWebclimber(soup)
-    elif target["type"] == Gym.ROCKGYMPRO:
+    elif target["type"] == Gym.ROCKGYMPRO.value:
         return parseRockGymPro(soup, target["location"])
 
 
 def parseBoulderado(soup):
+    logging.debug("Parsing boulderado")
+
     currentVisitors = None
     currentFree = None
     for div in soup.find_all("div"):
@@ -38,6 +40,8 @@ def parseBoulderado(soup):
 
 
 def parseWebclimber(soup):
+    logging.debug("Parsing webclimber")
+
     currentVisitors = None
     currentFree = None
     for div in soup.find_all("div"):
@@ -48,6 +52,8 @@ def parseWebclimber(soup):
 
 
 def parseRockGymPro(soup, location):
+    logging.debug("Parsing rockgympro")
+
     currentVisitors = None
     currentFree = None
     for script in soup.find_all("script"):
