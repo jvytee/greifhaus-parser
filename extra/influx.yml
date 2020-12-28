@@ -1,0 +1,80 @@
+# Generation of Kubernetes YAML is still under development!
+#
+# Save the output of this file and use kubectl create -f to import
+# it into Kubernetes.
+#
+# Created with podman-2.1.1
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: "2020-12-28T13:57:49Z"
+  labels:
+    app: influx-gymscraper
+  name: influx-gymscraper
+spec:
+  containers:
+  - command:
+    - -config
+    - /etc/influxdb/influxdb.conf
+    env:
+    - name: PATH
+      value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    - name: TERM
+      value: xterm
+    - name: container
+      value: podman
+    - name: containers
+      value: podman
+    - name: INFLUXDB_VERSION
+      value: 1.8.3
+    - name: HOSTNAME
+    image: docker.io/library/influxdb:latest
+    name: influx-gymscraper
+    ports:
+    - containerPort: 8086
+      hostPort: 8086
+      protocol: TCP
+    resources: {}
+    securityContext:
+      allowPrivilegeEscalation: true
+      capabilities: {}
+      privileged: false
+      readOnlyRootFilesystem: false
+      seLinuxOptions: {}
+    volumeMounts:
+    - mountPath: /var/lib/influxdb
+      name: home-julian-code-current-wirvsvirus-data-influx
+    - mountPath: /etc/influxdb/influxdb.conf
+      name: home-julian-code-current-wirvsvirus-gymscraper-extra-influxdb.conf
+      readOnly: true
+    workingDir: /
+  volumes:
+  - hostPath:
+      path: /home/julian/code/current/wirvsvirus/data/influx
+      type: Directory
+    name: home-julian-code-current-wirvsvirus-data-influx
+  - hostPath:
+      path: /home/julian/code/current/wirvsvirus/gymscraper/extra/influxdb.conf
+      type: File
+    name: home-julian-code-current-wirvsvirus-gymscraper-extra-influxdb.conf
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2020-12-28T13:57:49Z"
+  labels:
+    app: influx-gymscraper
+  name: influx-gymscraper
+spec:
+  ports:
+  - name: "8086"
+    nodePort: 32243
+    port: 8086
+    protocol: TCP
+    targetPort: 0
+  selector:
+    app: influx-gymscraper
+  type: NodePort
+status:
+  loadBalancer: {}
