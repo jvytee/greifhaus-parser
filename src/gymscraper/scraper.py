@@ -13,9 +13,11 @@ def parseTarget(target, outputDir):
         logging.error("Failed to parse: currentVisitors = %s, currentFree = %s", currentVisitors, currentFree)
         exit(-1)
 
+    logging.debug("Visitors: %s, free %s", currentVisitors, currentFree)
     counterFile = os.path.join(outputDir, "{}-counter.csv".format(target["name"]))
     latestDataFile = os.path.join(outputDir, "{}-latest.csv".format(target["name"]))
     csvExists = os.path.exists(counterFile)
+
     lastEntry = None
     currentTime = datetime.now().replace(microsecond=0).isoformat()
     newEntry = "{},{},{}\n".format(currentTime, currentVisitors, currentFree)
