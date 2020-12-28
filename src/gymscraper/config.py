@@ -2,6 +2,7 @@ import json
 import logging
 import os
 from datetime import datetime
+from typing import Optional
 
 from .parser import Gym
 
@@ -35,47 +36,51 @@ defaultConfig = {
 }
 
 
-def loadConfig():
-    # constants
-    configDir = os.path.dirname(__file__)
-    configFilename = os.path.join(configDir, "config.json")
+def loadConfig(filename: str) -> Optional[dict]:
     # check if file exists
-    if not os.path.isfile(configFilename):
-        logging.error('File "%s" not found. Creating empty config file, please fill in the empty fields', configFilename)
-        createEmptyConfig(configFilename, defaultConfig)
+    if not os.path.isfile(filename):
+        logging.error('File "%s" not found. Creating empty config file, please fill in the empty fields', filename)
+        createEmptyConfig(filename, defaultConfig)
         return None
+
     # try loading the config
-    with open(configFilename, "r") as configFile:
+    with open(filename, "r") as configFile:
         try:
             config = json.load(configFile)
         except json.decoder.JSONDecodeError:
             logging.error("Corrupt config. Creating empty config file, please fill in the empty fiels")
-            createEmptyConfig(configFilename, defaultConfig)
+            createEmptyConfig(filename, defaultConfig)
             return None
+
     # check all fields exists
     for key in defaultConfig:
         if not key in config or type(defaultConfig[key]) is not type(config[key]):
             logging.error('File "mail.config" incomplete. %s is missing or invalid. Renaming old config file and generating new config', key)
-            createEmptyConfig(configFilename, defaultConfig)
+            createEmptyConfig(filename, defaultConfig)
             return None
+
     # return valid config
     return config
 
 
-def createEmptyConfig(filename, defaultConfig):
+def createEmptyConfig(filename: str, defaultConfig: dict):
     saveOldConfig(filename)
+
     with open(filename, "w") as configFile:
         json.dump(defaultConfig, configFile)
 
 
-def saveOldConfig(filename):
+def saveOldConfig(filename: str):
     if not os.path.exists(filename):
         return
+
     targetFileName = "{0}_{1}.json".format(
         os.path.splitext(filename)[0], getTimeForFilename()
     )
+
     if os.path.exists(targetFileName):
         os.remove(targetFileName)
+
     os.rename(filename, targetFileName)
 
 

@@ -1,4 +1,5 @@
 import logging
+from argparse import ArgumentParser
 
 from .config import loadConfig
 from .scraper import parseTarget
@@ -7,10 +8,14 @@ from .scraper import parseTarget
 def main():
     message_format = "[%(levelname)s] %(asctime)s %(module)s:%(funcName)s - %(message)s"
     logging.basicConfig(format=message_format, level=logging.DEBUG)
-    config = loadConfig()
 
+    parser = ArgumentParser(description="Scrape gym visitor count")
+    parser.add_argument("-c", "--config", type=str, default="config.json", help="configuration file", metavar="FILE")
+    args = parser.parse_args()
+
+    config = loadConfig(args.config)
     if not config:
-        exit(-1)
+        return
 
     outputDir = config["outputDir"]
     targets = config["targets"]
