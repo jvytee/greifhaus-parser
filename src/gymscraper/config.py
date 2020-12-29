@@ -1,13 +1,12 @@
 import json
 import logging
 import os
-from datetime import datetime
 from typing import Optional
 
 from .parser import Gym
 
 
-defaultConfig = {
+DEFAULT = {
     "targets": [
         {
             "name": "greifhaus",
@@ -36,67 +35,15 @@ defaultConfig = {
 }
 
 
-# def loadConfig(filename: str) -> Optional[dict]:
-#     # check if file exists
-#     if not os.path.isfile(filename):
-#         logging.error('File "%s" not found. Creating empty config file, please fill in the empty fields', filename)
-#         createEmptyConfig(filename, defaultConfig)
-#         return None
-# 
-#     # try loading the config
-#     with open(filename, "r") as configFile:
-#         try:
-#             config = json.load(configFile)
-#         except json.decoder.JSONDecodeError:
-#             logging.error("Corrupt config. Creating empty config file, please fill in the empty fiels")
-#             createEmptyConfig(filename, defaultConfig)
-#             return None
-# 
-#     # check all fields exists
-#     for key in defaultConfig:
-#         if not key in config or type(defaultConfig[key]) is not type(config[key]):
-#             logging.error('File "mail.config" incomplete. %s is missing or invalid. Renaming old config file and generating new config', key)
-#             createEmptyConfig(filename, defaultConfig)
-#             return None
-# 
-#     # return valid config
-#     return config
-# 
-# 
-# def createEmptyConfig(filename: str, defaultConfig: dict):
-#     saveOldConfig(filename)
-# 
-#     with open(filename, "w") as configFile:
-#         json.dump(defaultConfig, configFile)
-# 
-# 
-# def saveOldConfig(filename: str):
-#     if not os.path.exists(filename):
-#         return
-# 
-#     targetFileName = "{0}_{1}.json".format(
-#         os.path.splitext(filename)[0], getTimeForFilename()
-#     )
-# 
-#     if os.path.exists(targetFileName):
-#         os.remove(targetFileName)
-# 
-#     os.rename(filename, targetFileName)
-# 
-# 
-# def getTimeForFilename():
-#     return datetime.now().strftime("%Y-%m-%d-%H%M%S")
-
-
 def load_config(filename: str) -> Optional[dict]:
     try:
         with open(filename, "r") as f:
             config = json.load(f)
             return config
-    except FileNotFoundError as e:
-        logging.error("File %s not found: %s", filename, e)
+    except FileNotFoundError:
+        logging.error("Configuration file %s not found", filename)
     except json.decoder.JSONDecodeError as e:
-        logging.error("Could not load JSON: %s", e)
+        logging.error("Could not decode JSON: %s", e)
 
     return None
 
@@ -106,5 +53,5 @@ def generate_config(filename: str, config: dict):
         json.dump(config, f)
 
 
-def verify_config(config: dict):
-    return all(key in config and isinstance(defaultConfig[key], type(value)) for key, value in defaultConfig.items())
+def verify_config(config: dict) -> list:
+    return [key for key, value in DEFAULT.items() if not (key in config and isinstance(config[key], type(value)))]
