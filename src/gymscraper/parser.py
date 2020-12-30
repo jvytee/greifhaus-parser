@@ -1,29 +1,12 @@
 import logging
 import re
-import urllib.request
 from enum import Enum
-from bs4 import BeautifulSoup
 
 
 class Gym(Enum):
     BOULDERADO = "boulderado"
     WEBCLIMBER = "webclimber"
     ROCKGYMPRO = "rock-gym-pro"
-
-
-def getClientCount(target):
-    logging.debug("Getting client count for %s", target)
-
-    url = target["url"]
-    html = urllib.request.urlopen(url).read()
-    soup = BeautifulSoup(html, features="lxml")
-
-    if target["type"] == Gym.BOULDERADO.value:
-        return parseBoulderado(soup)
-    elif target["type"] == Gym.WEBCLIMBER.value:
-        return parseWebclimber(soup)
-    elif target["type"] == Gym.ROCKGYMPRO.value:
-        return parseRockGymPro(soup, target["location"])
 
 
 def parseBoulderado(soup):

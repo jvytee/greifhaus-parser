@@ -1,8 +1,10 @@
 import logging
 import os
+from bs4 import BeautifulSoup
 from datetime import datetime
+from urllib import request
 
-from .parser import getClientCount
+from . import parser
 
 
 def parseTarget(target, outputDir):
@@ -40,3 +42,19 @@ def parseTarget(target, outputDir):
     with open(latestDataFile, "w") as latestDataCSV:
         latestDataCSV.write("time,visitors,available\n")
         latestDataCSV.write(newEntry)
+
+
+def getClientCount(target):
+    logging.debug("Getting client count for %s", target)
+
+    url = target["url"]
+    html = request.urlopen(url).read()
+    soup = BeautifulSoup(html, features="lxml")
+
+    if target["type"] == parser.Gym.BOULDERADO.value:
+        return parser.parseBoulderado(soup)
+    elif target["type"] == parser.Gym.WEBCLIMBER.value:
+        return parser.parseWebclimber(soup)
+    elif target["type"] == parser.Gym.ROCKGYMPRO.value:
+        return parser.parseRockGymPro(soup, target["location"])
+
