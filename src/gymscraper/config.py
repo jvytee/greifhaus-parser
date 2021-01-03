@@ -2,6 +2,7 @@ import json
 import logging
 import toml
 from pydantic import BaseModel, ValidationError
+from toml.decoder import TomlDecodeError
 from typing import Dict, Optional
 
 from .parser import GymType
@@ -29,6 +30,15 @@ DEFAULT_TARGETS = {
         }
 
 
+class Configuration(BaseModel):
+    influxdb_host: str = "localhost"
+    influxdb_port: int = 8086
+    influxdb_path: str = ""
+    influxdb_database: str = "gymscraper"
+    influxdb_username: Optional[str] = None
+    influxdb_password: Optional[str] = None
+
+
 class Target(BaseModel):
     url: str
     gym_type: str
@@ -53,6 +63,22 @@ def generate_config_json(filename: str, config: dict):
         json.dump(config, f)
 
 
+def load_configuration(filename: str) -> Optional[Configuration]:
+    try:
+        with open(filename, "r") as f:
+            config_dict = toml.load(f)
+
+        return Configuration(**config_dict)
+    except FileNotFoundError:
+        logging.error("Configuration file %s not found", filename)
+    except TomlDecodeError as e:
+        logging.error("Could not decode TOML: %s", e)
+    except ValidationError as e:
+        logging.error("Invlide configuration: %s", e)
+
+    return None
+
+
 def load_targets(filename: str) -> Optional[Dict[str, Target]]:
     try:
         with open(filename, "r") as f:
@@ -61,7 +87,7 @@ def load_targets(filename: str) -> Optional[Dict[str, Target]]:
         return {name: Target(**params) for name, params in targets.items()}
     except FileNotFoundError:
         logging.error("Target configuration file %s not found", filename)
-    except toml.decoder.TomlDecodeError as e:
+    except TomlDecodeError as e:
         logging.error("Could not decode TOML: %s", e)
     except ValidationError as e:
         logging.error("Invalid target configuration: %s", e)
