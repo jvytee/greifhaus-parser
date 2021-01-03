@@ -3,7 +3,7 @@ import logging
 import os
 import toml
 from pydantic import BaseModel, ValidationError
-from typing import List, Optional
+from typing import Dict, Optional
 
 from .parser import GymType
 
@@ -38,7 +38,6 @@ DEFAULT = {
 
 
 class Target(BaseModel):
-    name: str
     url: str
     gym_type: str
     location: Optional[str] = None
@@ -62,12 +61,12 @@ def generate_config_json(filename: str, config: dict):
         json.dump(config, f)
 
 
-def load_targets(filename: str) -> Optional[List[Target]]:
+def load_targets(filename: str) -> Optional[Dict[str, Target]]:
     try:
         with open(filename, "r") as f:
-            target_config = toml.load(f)
+            targets = toml.load(f)
 
-        return [Target(**target) for target in target_config["targets"]]
+        return {name: Target(**params) for name, params in targets.items()}
     except FileNotFoundError:
         logging.error("Target configuration file %s not found", filename)
     except toml.decoder.TomlDecodeError as e:
