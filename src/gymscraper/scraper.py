@@ -1,60 +1,36 @@
+import httpx
 import logging
-import os
 from bs4 import BeautifulSoup
-from datetime import datetime
-from urllib import request
+from typing import Callable, List, Optional, Tuple
 
 from . import parser
+from .config import Target
 
 
-def parseTarget(target, outputDir):
-    logging.debug("Parsing target %s", target)
+def scrape_targets(targets: List[Target]):
+    logging.debug("Scraping targets")
 
-    currentVisitors, currentFree = getClientCount(target)
-    if currentVisitors is None or currentFree is None:
-        logging.error("Failed to parse: currentVisitors = %s, currentFree = %s", currentVisitors, currentFree)
-        exit(-1)
+    for target in targets:
+        parser_function = parser.get_parser(target.gym_type)
 
-    logging.debug("Visitors: %s, free %s", currentVisitors, currentFree)
-    counterFile = os.path.join(outputDir, "{}-counter.csv".format(target["name"]))
-    latestDataFile = os.path.join(outputDir, "{}-latest.csv".format(target["name"]))
-    csvExists = os.path.exists(counterFile)
-
-    lastEntry = None
-    currentTime = datetime.now().replace(microsecond=0).isoformat()
-    newEntry = "{},{},{}\n".format(currentTime, currentVisitors, currentFree)
-
-    if csvExists:
-        with open(counterFile, "r") as outputCSV:
-            for line in outputCSV:
-                pass
-            lastEntry = line
-
-    with open(counterFile, "a") as outputCSV:
-        if not csvExists:
-            outputCSV.write("time,visitors,available\n")
-        if (
-            not lastEntry
-            or not lastEntry.partition(",")[2] == newEntry.partition(",")[2]
-        ):
-            outputCSV.write(newEntry)
-
-    with open(latestDataFile, "w") as latestDataCSV:
-        latestDataCSV.write("time,visitors,available\n")
-        latestDataCSV.write(newEntry)
+        visitors, free = scrape(target.url, parser_function, target.location)
+        save(target.name, visitors, free)
 
 
-def getClientCount(target):
-    logging.debug("Getting client count for %s", target)
+def scrape(url: str, parser_function: Callable, location: Optional[str] = None) -> Tuple[int, int]:
+    logging.debug("Scraping %s", url)
 
-    url = target["url"]
-    html = request.urlopen(url).read()
+    response = httpx.get(url)
+    html = response.text
     soup = BeautifulSoup(html, features="lxml")
 
-    if target["type"] == parser.Gym.BOULDERADO.value:
-        return parser.parseBoulderado(soup)
-    elif target["type"] == parser.Gym.WEBCLIMBER.value:
-        return parser.parseWebclimber(soup)
-    elif target["type"] == parser.Gym.ROCKGYMPRO.value:
-        return parser.parseRockGymPro(soup, target["location"])
+    if location is None:
+        visitors, free = parser_function(soup)
+    else:
+        visitors, free = parser_function(soup, location)
 
+    return (visitors, free)
+
+
+def save(name: str, visitors: int, free: int):
+    logging.debug("%s: %s visitors, %s free", name, visitors, free)

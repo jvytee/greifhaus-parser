@@ -1,12 +1,13 @@
 import logging
 import re
 from enum import Enum
+from typing import Callable
 
 
-class Gym(Enum):
+class GymType(Enum):
     BOULDERADO = "boulderado"
     WEBCLIMBER = "webclimber"
-    ROCKGYMPRO = "rock-gym-pro"
+    ROCKGYMPRO = "rockgympro"
 
 
 def parseBoulderado(soup):
@@ -50,3 +51,11 @@ def parseRockGymPro(soup, location):
             )
             currentFree = capacity - currentVisitors
     return (currentVisitors, currentFree)
+
+
+def get_parser(gymtype: str) -> Callable:
+    parsers = {GymType.BOULDERADO.value: parseBoulderado,
+               GymType.WEBCLIMBER.value: parseWebclimber,
+               GymType.ROCKGYMPRO.value: parseRockGymPro}
+
+    return parsers[gymtype]
