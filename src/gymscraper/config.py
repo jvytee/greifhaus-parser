@@ -1,6 +1,5 @@
 import json
 import logging
-import os
 import toml
 from pydantic import BaseModel, ValidationError
 from typing import Dict, Optional
@@ -8,33 +7,26 @@ from typing import Dict, Optional
 from .parser import GymType
 
 
-DEFAULT = {
-    "targets": [
-        {
-            "name": "greifhaus",
+DEFAULT_TARGETS = {
+        "greifhaus": {
             "url": "https://www.boulderado.de/boulderadoweb/gym-clientcounter/index.php?mode=get&token=eyJhbGciOiJIUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJjdXN0b21lciI6IkdyZWlmaGF1cyJ9.3Nen_IU5N2sVtJbP44CGCFfdKY93zQx2FRczY4z9Jy0",
             "gym_type": GymType.BOULDERADO.value,
-        },
-        {
-            "name": "fliegerhalle",
+            },
+        "fliegerhalle": {
             "url": "https://158.webclimber.de/de/trafficlight?callback=WebclimberTrafficlight.insertTrafficlight&key=yspPh6Mr2KdST3br8WC7X8p6BdETgmPn&hid=158&container=trafficlightContainer&type=&area=",
             "gym_type": GymType.WEBCLIMBER.value,
-        },
-        {
-            "name": "the-spot-boulder",
+            },
+        "thespot_boulder": {
             "url": "https://portal.rockgympro.com/portal/public/415a34a23151c6546419c1415d122b61/occupancy?&iframeid=occupancyCounter&fId=",
             "gym_type": GymType.ROCKGYMPRO.value,
             "location": "BLD",
-        },
-        {
-            "name": "the-spot-denver",
+            },
+        "thespot_denver": {
             "url": "https://portal.rockgympro.com/portal/public/415a34a23151c6546419c1415d122b61/occupancy?&iframeid=occupancyCounter&fId=",
             "gym_type": GymType.ROCKGYMPRO.value,
             "location": "DEN",
-        },
-    ],
-    "outputDir": os.path.dirname(__file__),
-}
+            },
+        }
 
 
 class Target(BaseModel):
@@ -83,4 +75,4 @@ def generate_config(filename: str, config: dict):
 
 
 def verify_config(config: dict) -> list:
-    return [key for key, value in DEFAULT.items() if not (key in config and isinstance(config[key], type(value)))]
+    return [key for key, value in DEFAULT_TARGETS.items() if not (key in config and isinstance(config[key], type(value)))]
